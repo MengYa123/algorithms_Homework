@@ -5,6 +5,9 @@
 using namespace std;
 
 const char operation[][2] = {{'*','/'},{'+','-'}};
+char temp,ch;
+double total = 0,temp_total = 0,leftNum,rightNum;
+
 int getPrior(char ch){
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 2; ++j) {
@@ -13,7 +16,7 @@ int getPrior(char ch){
             }
         }
     }
-    return 10;//ä»…ä»…æ˜¯ä¸ºäº†æ¶ˆé™¤ä¸€ä¸ªè­¦å‘Šï¼Œè®©æŸä¸ªç¬¦å·èƒ½å¤Ÿæ”¾åˆ°æ‹¬å·ä¸Šè¾¹
+    return 10;//½ö½öÊÇÎªÁËÏû³ıÒ»¸ö¾¯¸æ£¬ÈÃÄ³¸ö·ûºÅÄÜ¹»·Åµ½À¨ºÅÉÏ±ß
 }
 void getNum(int &counter,const char* str,stack<double> &num,int &sign){
     char ch;
@@ -37,114 +40,94 @@ void getNum(int &counter,const char* str,stack<double> &num,int &sign){
         return ;
     }
 }
+void compute(stack<char> &oper,stack<double> &num){
+    ch = oper.top();
+    oper.pop();
+    rightNum = num.top();
+    num.pop();
+    leftNum = num.top();
+    num.pop();
+    switch (ch){
+        case '+':
+            temp_total = leftNum + rightNum;
+            break;
+        case '-':
+            temp_total = leftNum - rightNum;
+            break;
+        case '*':
+            temp_total = leftNum * rightNum;
+            break;
+        case '/':
+            temp_total = leftNum / rightNum;
+            break;
+        default:
+            break;
+    }
+    total = temp_total;
+    num.push(temp_total);
+    cout << leftNum << " " << rightNum << " " << ch << " ";
+}
 int main() {
-    double total = 0,temp_total = 0;
     char str[1024];
-    stack<double> num = stack<double>();
-    stack<char> oper = stack<char>();
-    scanf("%s",str);
-    int counter = 0,sign = 0;//signæ ‡å¿—ä½ï¼Œæ ‡å¿—å‡ºåä¸€ä¸ªæ•°å­—çš„æ­£è´Ÿå·
-    char temp,ch;
-    double left,right;
+    bool error = true;
+    stack<double> num;
+    stack<char> oper;
+    int counter,sign,sign_judge;//sign_judge±íÊ¾¼ì²â·Ç·¨×Ö·û
+    
+    while (scanf("%s",str) && strcmp(str,"stop") != 0){
+        sign_judge = 1;
+        for (int i = 0; i < strlen(str); ++i) {
+            if (!(str[i] >= '0' && str[i] <= '9') && str[i] != '.' && str[i] != '+' && str[i] != '-' && str[i] != '*' && str[i] != '/' && str[i] != '#' && str[i] != '(' && str[i] != ')'){
+                cout << "±í´ïÊ½´íÎó->³öÏÖ·Ç·¨×Ö·û£¡" << endl;
+                sign_judge = 0;
+                break;
+            }
+        }
+        if (!sign_judge)
+            continue;
+        cout << "Äæ²¨À¼±í´ïÊ½£º";
+        oper = stack<char>();
+        num = stack<double>();
+        counter = 0,sign = 0;//sign±êÖ¾Î»£¬±êÖ¾³öºóÒ»¸öÊı×ÖµÄÕı¸ººÅ
 
-    while (counter <= strlen(str) - 1){
-        getNum(counter,str,num,sign);
-        temp = str[counter];
-        if (counter <= strlen(str) - 1 && temp != '\0'){
-            if (temp == '#'){
-                sign = 1;
-            } else{
-                if (temp == ')'){
-                    while (oper.top() != '('){
-                        ch = oper.top();
-                        oper.pop();
-                        right = num.top();
-                        num.pop();
-                        left = num.top();
-                        num.pop();
-                        switch (ch){
-                            case '+':
-                                temp_total = left + right;
-                                break;
-                            case '-':
-                                temp_total = left - right;
-                                break;
-                            case '*':
-                                temp_total = left * right;
-                                break;
-                            case '/':
-                                temp_total = left / right;
-                                break;
-                            default:
-                                break;
-                        }
-                        total = temp_total;
-                        num.push(temp_total);
-                    }
-                    oper.pop();
+        while (counter <= strlen(str) - 1){
+            getNum(counter,str,num,sign);
+            temp = str[counter];
+            if (counter <= strlen(str) - 1 && temp != '\0'){
+                if (temp == '#'){
+                    sign = 1;
                 } else{
-                    if (oper.empty() || getPrior(oper.top()) > getPrior(temp) || temp == '('){
-                        oper.push(temp);
-                    } else{
-                        while (!oper.empty() && getPrior(oper.top()) <= getPrior(temp)){
-                            ch = oper.top();
-                            oper.pop();
-                            right = num.top();
-                            num.pop();
-                            left = num.top();
-                            num.pop();
-                            switch (ch){
-                                case '+':
-                                    temp_total = left + right;
-                                    break;
-                                case '-':
-                                    temp_total = left - right;
-                                    break;
-                                case '*':
-                                    temp_total = left * right;
-                                    break;
-                                case '/':
-                                    temp_total = left / right;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            total = temp_total;
-                            num.push(temp_total);
+                    if (temp == ')'){
+                        while (oper.top() != '('){
+                            compute(oper,num);
                         }
-                        oper.push(temp);
+                        oper.pop();
+                    } else{
+                        if (oper.empty() || getPrior(oper.top()) > getPrior(temp) || temp == '('){
+                            oper.push(temp);
+                        } else{
+                            while (!oper.empty() && getPrior(oper.top()) <= getPrior(temp)){
+                                compute(oper,num);
+                            }
+                            oper.push(temp);
+                        }
                     }
                 }
+                counter ++;
             }
-            counter ++;
+        }
+        while(!oper.empty()){
+            if(oper.top() == '('){
+                cout << "±í´ïÊ½´íÎó->À¨ºÅÎ´±ÕºÏ!" << endl;
+                error = false;
+                break;
+            }
+            compute(oper,num);
+        }
+        cout << endl;
+        if (error){
+            cout << total << endl;
         }
     }
-    while(!oper.empty()){
-        ch = oper.top();
-        oper.pop();
-        right = num.top();
-        num.pop();
-        left = num.top();
-        num.pop();
-        switch (ch){
-            case '+':
-                temp_total = left + right;
-                break;
-            case '-':
-                temp_total = left - right;
-                break;
-            case '*':
-                temp_total = left * right;
-                break;
-            case '/':
-                temp_total = left / right;
-                break;
-            default:
-                break;
-        }
-        total = temp_total;
-        num.push(temp_total);
-    }
-    cout << total;
     return 0;
 }
