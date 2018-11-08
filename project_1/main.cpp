@@ -73,12 +73,14 @@ int main() {
     stack<double> num;
     stack<char> oper;
     int counter,sign,sign_judge;//sign_judge表示检测非法字符
-    
+
     while (scanf("%s",str) && strcmp(str,"stop") != 0){
+        error = true;
         sign_judge = 1;
         for (int i = 0; i < strlen(str); ++i) {
             if (!(str[i] >= '0' && str[i] <= '9') && str[i] != '.' && str[i] != '+' && str[i] != '-' && str[i] != '*' && str[i] != '/' && str[i] != '#' && str[i] != '(' && str[i] != ')'){
                 cout << "表达式错误->出现非法字符！" << endl;
+                error = false;
                 sign_judge = 0;
                 break;
             }
@@ -98,10 +100,17 @@ int main() {
                     sign = 1;
                 } else{
                     if (temp == ')'){
-                        while (oper.top() != '('){
+                        while (!oper.empty() && oper.top() != '('){
                             compute(oper,num);
                         }
-                        oper.pop();
+                        if (!oper.empty() && oper.top() == '('){
+                            oper.pop();
+                        } else{
+                            cout << endl << "表达式错误->括号未闭合!";
+                            error = false;
+                            continue;
+                        }
+
                     } else{
                         if (oper.empty() || getPrior(oper.top()) > getPrior(temp) || temp == '('){
                             oper.push(temp);
@@ -118,7 +127,7 @@ int main() {
         }
         while(!oper.empty()){
             if(oper.top() == '('){
-                cout << "表达式错误->括号未闭合!" << endl;
+                cout  << endl <<"表达式错误->括号未闭合!" << endl;
                 error = false;
                 break;
             }
