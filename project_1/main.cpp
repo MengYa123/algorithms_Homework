@@ -68,6 +68,7 @@ void compute(stack<char> &oper,stack<double> &num){
         rightNum = num.top();
         num.pop();
     } else{
+        oper.pop();
         error = false;
         return;
     }
@@ -77,6 +78,7 @@ void compute(stack<char> &oper,stack<double> &num){
         leftNum = num.top();
         num.pop();
     } else{
+        oper.pop();
         error = false;
         return;
     }
@@ -162,8 +164,12 @@ int main() {
                 error = false;
                 break;
             }
-            cout << oper.top() << " ";
-            compute(oper,num);
+            if (!error){
+                break;
+            } else{
+                cout << oper.top() << " ";
+                compute(oper,num);
+            }
         }
         cout << endl;
         if (error)
