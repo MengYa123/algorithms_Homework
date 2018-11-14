@@ -16,7 +16,7 @@ int getPrior(char ch){
             }
         }
     }
-    return 10;//仅仅是为了消除一个警告，让某个符号能够放到括号上边
+    return 10;//输出一个很大的优先级
 }
 void getNum(int &counter,const char* str,stack<double> &num,int &sign){
     char ch;
@@ -36,6 +36,7 @@ void getNum(int &counter,const char* str,stack<double> &num,int &sign){
             temp = strtod(str_num, nullptr);
         }
         num.push(temp);
+        cout << temp << " ";
     } else{
         return ;
     }
@@ -65,21 +66,21 @@ void compute(stack<char> &oper,stack<double> &num){
     }
     total = temp_total;
     num.push(temp_total);
-    cout << leftNum << " " << rightNum << " " << ch << " ";
+//    cout << leftNum << " " << rightNum << " " << ch << " ";
 }
 int main() {
     char str[1024];
-    bool error = true;
+    bool error;
     stack<double> num;
     stack<char> oper;
-    int counter,sign,sign_judge;//sign_judge表示检测非法字符
+    int counter,sign,sign_judge;//sign_judge非法字符错误
 
     while (scanf("%s",str) && strcmp(str,"stop") != 0){
         error = true;
         sign_judge = 1;
         for (int i = 0; i < strlen(str); ++i) {
             if (!(str[i] >= '0' && str[i] <= '9') && str[i] != '.' && str[i] != '+' && str[i] != '-' && str[i] != '*' && str[i] != '/' && str[i] != '#' && str[i] != '(' && str[i] != ')'){
-                cout << "表达式错误->出现非法字符！" << endl;
+                cout << "发生错误->出现非法字符" << endl;
                 error = false;
                 sign_judge = 0;
                 break;
@@ -87,10 +88,10 @@ int main() {
         }
         if (!sign_judge)
             continue;
-        cout << "逆波兰表达式：";
+        cout << "逆波兰表示法：";
         oper = stack<char>();
         num = stack<double>();
-        counter = 0,sign = 0;//sign标志位，标志出后一个数字的正负号
+        counter = 0,sign = 0;//sign表示正负号
 
         while (counter <= strlen(str) - 1){
             getNum(counter,str,num,sign);
@@ -101,14 +102,15 @@ int main() {
                 } else{
                     if (temp == ')'){
                         while (!oper.empty() && oper.top() != '('){
+                            cout << oper.top() << " ";
                             compute(oper,num);
                         }
                         if (!oper.empty() && oper.top() == '('){
                             oper.pop();
                         } else{
-                            cout << endl << "表达式错误->括号未闭合!";
+                            cout << endl << "发生错误->右括号未匹配!";
                             error = false;
-                            continue;
+                            break;
                         }
 
                     } else{
@@ -116,6 +118,7 @@ int main() {
                             oper.push(temp);
                         } else{
                             while (!oper.empty() && getPrior(oper.top()) <= getPrior(temp)){
+                                cout << oper.top() << " ";
                                 compute(oper,num);
                             }
                             oper.push(temp);
@@ -127,10 +130,11 @@ int main() {
         }
         while(!oper.empty()){
             if(oper.top() == '('){
-                cout  << endl <<"表达式错误->括号未闭合!" << endl;
+                cout  << endl <<"发生错误->左括号未匹配!" << endl;
                 error = false;
                 break;
             }
+            cout << oper.top() << " ";
             compute(oper,num);
         }
         cout << endl;
