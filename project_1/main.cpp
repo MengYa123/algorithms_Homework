@@ -19,7 +19,7 @@ const char operation[][2] = {{'*','/'},{'+','-'}};
 char temp,ch;
 double total = 0,leftNum,rightNum;
 char str[1024];
-bool error;
+bool error,divided_zero,oper_err;
 int counter,sign,sign_judge;//sign_judge非法字符错误
 /**
  * @param ch 表示读取到的非数字字符
@@ -43,6 +43,8 @@ void getNum(int &counter,const char* str,stack<double> &num,int &sign){
     double temp = 0;
     int counter_num = 0;
     char str_num[50];
+    if (str[counter] == '+'||str[counter] == '-'||str[counter] == '*'||str[counter] == '/')
+        oper_err=true;
     while (((ch = str[counter]) >= '0' && (ch = str[counter]) <= '9') || ch == '.' ){
         str_num[counter_num] = ch;
         counter_num ++;
@@ -78,7 +80,6 @@ void compute(stack<char> &oper,stack<double> &num){
         leftNum = num.top();
         num.pop();
     } else{
-        oper.pop();
         error = false;
         return;
     }
@@ -93,6 +94,10 @@ void compute(stack<char> &oper,stack<double> &num){
             total = leftNum * rightNum;
             break;
         case '/':
+            if (rightNum == 0){
+                divided_zero = true;
+                return;
+            }
             total = leftNum / rightNum;
             break;
         default:
@@ -109,6 +114,8 @@ int main() {
     stack<char> oper;
     while (cin >> str && strcmp(str,"stop") != 0){
         error = true;
+        divided_zero = false;
+        oper_err= false;
         sign_judge = 1;
         for (int i = 0; i < strlen(str); ++i)
             if (!(str[i] >= '0' && str[i] <= '9') && str[i] != '.' && str[i] != '+' && str[i] != '-' && str[i] != '*' && str[i] != '/' && str[i] != '#' && str[i] != '(' && str[i] != ')'){
@@ -172,10 +179,17 @@ int main() {
             }
         }
         cout << endl;
-        if (error)
-            cout << num.top() << endl;
+        if (!num.empty() && num.size() != 1)
+            cout << "表达式有误->操作符个数不正确" << endl;
+        else if (divided_zero)
+            cout << "表达式有误->除数为零" << endl;
+        else if (oper_err)
+            cout << "表达式有误->操作符位置错误" << endl;
         else
-            cout << "表达式有误->操作数个数不正确" << endl;
+            if (error)
+                cout << num.top() << endl;
+            else
+                cout << "表达式有误->操作数个数不正确" << endl;
     }
     return 0;
 }
