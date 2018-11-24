@@ -43,8 +43,6 @@ void getNum(int &counter,const char* str,stack<double> &num,int &sign){
     double temp = 0;
     int counter_num = 0;
     char str_num[50];
-    if (str[counter] == '+'||str[counter] == '-'||str[counter] == '*'||str[counter] == '/')
-        oper_err=true;
     while (((ch = str[counter]) >= '0' && (ch = str[counter]) <= '9') || ch == '.' ){
         str_num[counter_num] = ch;
         counter_num ++;
@@ -59,7 +57,11 @@ void getNum(int &counter,const char* str,stack<double> &num,int &sign){
         num.push(temp);
         cout << temp << " ";
     } else
-        return ;
+        if (sign == 1){
+            error = false;
+            return;
+        } else
+            return ;
 }
 /**
  * @param oper 运算符栈
@@ -112,6 +114,7 @@ void compute(stack<char> &oper,stack<double> &num){
 int main() {
     stack<double> num;
     stack<char> oper;
+    cout << "请输入表达式:";
     while (cin >> str && strcmp(str,"stop") != 0){
         error = true;
         divided_zero = false;
@@ -190,6 +193,7 @@ int main() {
                 cout << num.top() << endl;
             else
                 cout << "表达式有误->操作数个数不正确" << endl;
+        cout << "请输入表达式:";
     }
     return 0;
 }
